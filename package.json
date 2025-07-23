@@ -1,0 +1,14 @@
+{
+  "name": "inventorymanagement",
+  "version": "1.0.0",
+  "description": "the one-stop inventory management webApp",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "author": "laveeshSanadhya",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
