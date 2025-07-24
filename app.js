@@ -13,8 +13,11 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 // app.use(cookieParser());
 app.use('/api/v1/auth', authRouter);
-// app.use('/api/v1/product', productRouter);
+app.use('/api/v1/product', productRouter);
 
+// app.use(express.static(path.resolve("./public"))) ;
+// app.set('view engine' , 'ejs') ;
+// app.set("views" , path.resolve("./views")) ; 
 
 
 
