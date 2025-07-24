@@ -7,9 +7,8 @@ authRouter.post('/login' , login);
 
 authRouter.post('/signup', signUp);
 
-authRouter.post('/logout', (req, res) => {
-    // Handle user logout
-    res.send("User logged out");
+authRouter.get('/logout', (req, res) => {
+    res.clearCookie('token').redirect('/');
 });
 
 // export default authRouter;

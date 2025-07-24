@@ -19,6 +19,21 @@ export const signUp = async (req , res) => {
         const hashedPassword = await bcrypt.hash(password , salt ) ; 
 
         const newUser = await User.create([{username , name , email , password: hashedPassword}], {session}) ;
+        
+       
+        const token = jwt.sign({
+            userId: newUser[0]._id
+        }, process.env.JWT_SECRET, {
+            expiresIn: '1h'
+        });
+
+        
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: false,      // Set to true in production with HTTPS
+            maxAge: 60 * 60 * 1000  // 1 hour
+        });
+
         await session.commitTransaction() ; 
         session.endSession() ;
 
@@ -26,8 +41,8 @@ export const signUp = async (req , res) => {
             success: true,
             message: 'Sign up successful!',
             data : {
-                
-                user:newUser[0] ,
+                token,
+                user: newUser[0] ,
             }
 
         });
@@ -63,6 +78,17 @@ export const login = async (req ,res) =>{
         }, process.env.JWT_SECRET, {
             expiresIn: '1h'
         })
+
+        // Set token as cookie
+        res.cookie('token', token, {
+            httpOnly: true,     // Prevents XSS attacks
+            secure: false,      // Set to true in production with HTTPS
+           
+            maxAge: 60 * 60 * 1000  // 1 hour in milliseconds
+        });
+
+        await session.commitTransaction();
+        session.endSession();
 
         res.status(200).json({
             success: true,
