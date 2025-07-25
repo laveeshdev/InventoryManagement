@@ -98,6 +98,7 @@ function App() {
         },
         credentials: 'include',
         body: JSON.stringify(loginData),
+        
       });
       const data = await res.json();
       if (res.ok && data.success) {
