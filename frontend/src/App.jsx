@@ -334,14 +334,18 @@ function App() {
         ) : (
           <div className="update-products-list">
             {products.map((prod) => (
-              <div key={prod._id} className="update-product-item">
-                <div>
-                  <div style={{fontWeight:700, fontSize:'1.15rem', marginBottom:2}}>{prod.name}</div>
-                  <div style={{color:'#555', fontSize:'1rem'}}>Current quantity: {prod.quantity}</div>
+              <div key={prod._id} className="update-product-item" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'2rem'}}>
+                <div style={{display:'flex',flexDirection:'column',gap:'0.4rem'}}>
+                  <div style={{fontWeight:700, fontSize:'1.18rem', marginBottom:0}}>{prod.name}</div>
+                  <div style={{display:'flex',alignItems:'center',gap:'0.7rem',color:'#555',fontSize:'1rem'}}>
+                    <span>Current quantity:</span>
+                    <span className="highlight-qty">{prod.quantity}</span>
+                  </div>
                 </div>
-                <div style={{display:'flex', gap:'0.7rem'}}>
+                <div style={{display:'flex',flexDirection:'column',gap:'0.6rem',alignItems:'flex-end',minWidth:'110px'}}>
                   <button
                     className="update-qty-btn"
+                    style={{width:'90px'}}
                     onClick={() => {
                       setSelectedProduct(prod);
                       setCurrentView('updatequantity');
@@ -351,6 +355,7 @@ function App() {
                   </button>
                   <button
                     className="delete-product-btn"
+                    style={{width:'90px'}}
                     onClick={() => {
                       setProductToDelete(prod);
                       setShowDeleteConfirm(true);

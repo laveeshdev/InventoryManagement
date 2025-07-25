@@ -1,3 +1,71 @@
+/* Delete Confirm Modal Styles */
+.delete-confirm-modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(229,62,62,0.13), 0 2px 8px rgba(59,130,246,0.08);
+  padding: 2.5rem 2.2rem 2rem 2.2rem;
+  border: 1.5px solid #fecaca;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+.delete-confirm-modal .modal-header h3 {
+  color: #c53030;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.delete-confirm-modal .modal-body p {
+  color: #374151;
+  font-size: 1.08rem;
+  margin: 0.5rem 0 0.7rem 0;
+}
+.delete-confirm-modal .warning-text {
+  color: #c53030;
+  background: #fee2e2;
+  border-radius: 8px;
+  padding: 8px 0;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+.delete-confirm-modal .modal-actions {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+.delete-confirm-btn {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(229,62,62,0.10);
+}
+.delete-confirm-btn:hover {
+  background: #c53030;
+  box-shadow: 0 6px 18px rgba(229,62,62,0.18);
+}
+.delete-confirm-modal .cancel-btn {
+  background: #f9fafb;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.delete-confirm-modal .cancel-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 /* CSS Reset */
 * {
