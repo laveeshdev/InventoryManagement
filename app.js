@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectionToDatabase from './config/connectionDb.js';
 import config from './config/env.js';
 import { authRouter } from './routes/auth.route.js';
+import { productRouter } from './routes/product.route.js';
 import cookieParser from 'cookie-parser';
 
 
@@ -15,9 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/product', productRouter);
 
-// app.use(express.static(path.resolve("./public"))) ;
-// app.set('view engine' , 'ejs') ;
-// app.set("views" , path.resolve("./views")) ; 
+
 
 
 
