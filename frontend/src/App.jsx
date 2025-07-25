@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import AddItemForm from './components/AddItemForm';
 
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const Logo = () => (
   <div className="logo-circle">
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -28,7 +30,7 @@ function App() {
     const checkAuthStatus = async () => {
       try {
         // Try to fetch user profile to verify authentication
-        const res = await fetch('http://localhost:3000/api/v1/product/list', {
+        const res = await fetch(`${apiUrl}/api/v1/product/list`, {
           credentials: 'include',
         });
         
@@ -60,7 +62,7 @@ function App() {
   const handleLogout = async () => {
     try {
       // Call logout API to clear server-side session/cookies
-      await fetch('http://localhost:3000/api/v1/auth/logout', {
+      await fetch(`${apiUrl}/api/v1/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -89,7 +91,7 @@ function App() {
     e.preventDefault();
     setMessage('');
     try {
-      const res = await fetch('http://localhost:3000/api/v1/auth/login', {
+      const res = await fetch(`${apiUrl}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +120,7 @@ function App() {
     e.preventDefault();
     setMessage('');
     try {
-      const res = await fetch('http://localhost:3000/api/v1/auth/signup', {
+      const res = await fetch(`${apiUrl}/api/v1/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,7 +174,7 @@ function App() {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('http://localhost:3000/api/v1/product/list', {
+        const res = await fetch(`${apiUrl}/api/v1/product/list`, {
           credentials: 'include',
         });
         const data = await res.json();
@@ -200,7 +202,7 @@ function App() {
       e.preventDefault();
       setAddMessage('');
       try {
-        const res = await fetch('http://localhost:3000/api/v1/product/add', {
+        const res = await fetch(`${apiUrl}/api/v1/product/add`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -302,7 +304,7 @@ function App() {
     // Delete Product Function
     const handleDeleteProduct = async (productId) => {
       try {
-        const res = await fetch(`http://localhost:3000/api/v1/product/${productId}`, {
+        const res = await fetch(`${apiUrl}/api/v1/product/${productId}`, {
           method: 'DELETE',
           credentials: 'include',
         });
@@ -419,7 +421,7 @@ function App() {
                 break;
             }
 
-            fetch(`http://localhost:3000/api/v1/product/${selectedProduct._id}/quantity`, {
+            fetch(`${apiUrl}/api/v1/product/${selectedProduct._id}/quantity`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -548,7 +550,7 @@ function App() {
 
     // Add Item API handler for new AddItemForm
     const handleAddItemAPI = async (form) => {
-      const res = await fetch('http://localhost:3000/api/v1/product/add', {
+      const res = await fetch(`${apiUrl}/api/v1/product/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
