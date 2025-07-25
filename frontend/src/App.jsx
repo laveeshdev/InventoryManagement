@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import AddItemForm from './components/AddItemForm';
 
-const apiUrl = 'https://inventorymanagement-lej0.onrender.com';
+const apiUrl = process.env.VITE_API_URL;
 
 const Logo = () => (
   <div className="logo-circle">
@@ -98,7 +98,7 @@ function App() {
         },
         credentials: 'include',
         body: JSON.stringify(loginData),
-        
+
       });
       const data = await res.json();
       if (res.ok && data.success) {
