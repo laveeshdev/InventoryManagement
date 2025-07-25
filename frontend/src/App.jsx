@@ -380,14 +380,14 @@ function App() {
           <p>Current quantity: <strong>{selectedProduct?.quantity}</strong></p>
         </div>
         <div className="update-quantity-form-container">
-          <form className="update-quantity-form" onSubmit={handleUpdateQuantity}>
+          <form className="update-quantity-form" onSubmit={handleUpdateQuantity} autoComplete="off">
             <div className="update-type-section">
               <h3>Transaction Type</h3>
               <div className="update-type-buttons">
                 <button
                   type="button"
                   className={`update-type-btn set-to${updateQuantityForm.action === 'adjust' ? ' active' : ''}`}
-                  onClick={() => setUpdateQuantityForm({ ...updateQuantityForm, action: 'adjust' })}
+                  onClick={() => setUpdateQuantityForm(form => ({ ...form, action: 'adjust' }))}
                   title="Set the quantity to an exact value"
                   aria-label="Set To"
                 >
@@ -396,7 +396,7 @@ function App() {
                 <button
                   type="button"
                   className={`update-type-btn add${updateQuantityForm.action === 'purchase' ? ' active' : ''}`}
-                  onClick={() => setUpdateQuantityForm({ ...updateQuantityForm, action: 'purchase' })}
+                  onClick={() => setUpdateQuantityForm(form => ({ ...form, action: 'purchase' }))}
                   title="Purchase (add to stock)"
                   aria-label="Purchase"
                 >
@@ -405,7 +405,7 @@ function App() {
                 <button
                   type="button"
                   className={`update-type-btn subtract${updateQuantityForm.action === 'sale' ? ' active' : ''}`}
-                  onClick={() => setUpdateQuantityForm({ ...updateQuantityForm, action: 'sale' })}
+                  onClick={() => setUpdateQuantityForm(form => ({ ...form, action: 'sale' }))}
                   title="Sale (remove from stock)"
                   aria-label="Sale"
                 >
@@ -414,21 +414,25 @@ function App() {
               </div>
             </div>
             <div className="new-quantity-section">
-              <h3>{updateQuantityForm.action === 'adjust' ? 'Set New Quantity' : updateQuantityForm.action === 'purchase' ? 'Purchase Quantity' : 'Sale Quantity'}</h3>
+              <h3>Quantity</h3>
               <input
                 type="number"
-                placeholder={updateQuantityForm.action === 'adjust' ? 'Enter new quantity' : updateQuantityForm.action === 'purchase' ? 'Enter quantity to purchase' : 'Enter quantity to sell'}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Enter quantity"
                 value={updateQuantityForm.quantity}
-                onChange={(e) => setUpdateQuantityForm({ ...updateQuantityForm, quantity: e.target.value })}
+                onChange={e => {
+                  // Only allow numbers, prevent leading zeros
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setUpdateQuantityForm(form => ({ ...form, quantity: val.replace(/^0+(?!$)/, '') }));
+                }}
                 required
                 min={1}
                 className="quantity-input"
+                autoComplete="off"
               />
             </div>
             <div className="form-actions-update">
-              <button type="button" className="change-item-btn" onClick={() => setCurrentView('updatelist')}>
-                Change Item
-              </button>
               <button type="submit" className="update-quantity-btn">
                 Update Quantity
               </button>
