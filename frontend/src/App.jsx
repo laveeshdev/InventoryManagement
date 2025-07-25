@@ -379,41 +379,45 @@ function App() {
           <h2>{selectedProduct?.name}</h2>
           <p>Current quantity: <strong>{selectedProduct?.quantity}</strong></p>
         </div>
-        
         <div className="update-quantity-form-container">
           <form className="update-quantity-form" onSubmit={handleUpdateQuantity}>
             <div className="update-type-section">
-              <h3>Update Type</h3>
+              <h3>Transaction Type</h3>
               <div className="update-type-buttons">
                 <button
                   type="button"
-                  className={`update-type-btn set-to ${updateQuantityForm.action === 'adjust' ? 'active' : ''}`}
+                  className={`update-type-btn set-to${updateQuantityForm.action === 'adjust' ? ' active' : ''}`}
                   onClick={() => setUpdateQuantityForm({ ...updateQuantityForm, action: 'adjust' })}
+                  title="Set the quantity to an exact value"
+                  aria-label="Set To"
                 >
-                  Set To
+                  <span style={{marginRight:6,verticalAlign:'middle'}}>🔢</span> Set To
                 </button>
                 <button
                   type="button"
-                  className={`update-type-btn add ${updateQuantityForm.action === 'purchase' ? 'active' : ''}`}
+                  className={`update-type-btn add${updateQuantityForm.action === 'purchase' ? ' active' : ''}`}
                   onClick={() => setUpdateQuantityForm({ ...updateQuantityForm, action: 'purchase' })}
+                  title="Purchase (add to stock)"
+                  aria-label="Purchase"
                 >
-                  Add
+                  <span style={{marginRight:6,verticalAlign:'middle'}}>🛒</span> Purchase
                 </button>
                 <button
                   type="button"
-                  className={`update-type-btn subtract ${updateQuantityForm.action === 'sale' ? 'active' : ''}`}
+                  className={`update-type-btn subtract${updateQuantityForm.action === 'sale' ? ' active' : ''}`}
                   onClick={() => setUpdateQuantityForm({ ...updateQuantityForm, action: 'sale' })}
+                  title="Sale (remove from stock)"
+                  aria-label="Sale"
                 >
-                  Subtract
+                  <span style={{marginRight:6,verticalAlign:'middle'}}>💸</span> Sale
                 </button>
               </div>
             </div>
-            
             <div className="new-quantity-section">
-              <h3>New Quantity</h3>
+              <h3>{updateQuantityForm.action === 'adjust' ? 'Set New Quantity' : updateQuantityForm.action === 'purchase' ? 'Purchase Quantity' : 'Sale Quantity'}</h3>
               <input
                 type="number"
-                placeholder="Enter quantity"
+                placeholder={updateQuantityForm.action === 'adjust' ? 'Enter new quantity' : updateQuantityForm.action === 'purchase' ? 'Enter quantity to purchase' : 'Enter quantity to sell'}
                 value={updateQuantityForm.quantity}
                 onChange={(e) => setUpdateQuantityForm({ ...updateQuantityForm, quantity: e.target.value })}
                 required
@@ -421,7 +425,6 @@ function App() {
                 className="quantity-input"
               />
             </div>
-            
             <div className="form-actions-update">
               <button type="button" className="change-item-btn" onClick={() => setCurrentView('updatelist')}>
                 Change Item
@@ -430,7 +433,6 @@ function App() {
                 Update Quantity
               </button>
             </div>
-            
             {updateMessage && (
               <div className={`form-message ${updateMessage.includes('successfully') ? 'success' : 'error'}`}>
                 {updateMessage}

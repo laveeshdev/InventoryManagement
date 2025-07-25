@@ -1,3 +1,144 @@
+/* Update Quantity Page Enhancements */
+.update-quantity-page {
+  max-width: 480px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.10);
+  padding: 2.5rem 2rem 2rem 2rem;
+  border: 1.5px solid #e0e7ef;
+}
+.update-quantity-header h1 {
+  color: #1d4ed8;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.update-quantity-header h2 {
+  color: #222;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  text-align: center;
+}
+.update-quantity-header p {
+  color: #374151;
+  font-size: 1.05rem;
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+.update-type-section {
+  margin-bottom: 1.2rem;
+}
+.update-type-section h3 {
+  font-size: 1.08rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+.update-type-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+.update-type-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #f3f4f6;
+  color: #374151;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.06);
+}
+.update-type-btn.active,
+.update-type-btn.set-to.active {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.13);
+}
+.update-type-btn.add.active {
+  background: #10b981;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(16,185,129,0.13);
+}
+.update-type-btn.subtract.active {
+  background: #e53e3e;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(229,62,62,0.13);
+}
+.update-type-btn:hover:not(.active) {
+  background: #e0e7ef;
+  color: #222;
+}
+.new-quantity-section {
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+.new-quantity-section h3 {
+  font-size: 1.08rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+.quantity-input {
+  width: 80%;
+  max-width: 220px;
+  padding: 12px 16px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+  color: #222;
+  background: #f8fafc;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.quantity-input:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+}
+.form-actions-update {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-top: 1.2rem;
+}
+.change-item-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.change-item-btn:hover {
+  background: #e0e7ef;
+  color: #222;
+}
+.update-quantity-btn {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.08);
+}
+.update-quantity-btn:hover {
+  background: #2563eb;
+  box-shadow: 0 6px 18px rgba(59,130,246,0.13);
+}
 /* Delete Confirm Modal Styles */
 .delete-confirm-modal {
   background: #fff;
