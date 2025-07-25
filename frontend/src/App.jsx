@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import AddItemForm from './components/AddItemForm';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiUrl = import.meta.env.VITE_API_URL ;
 
 const Logo = () => (
   <div className="logo-circle">
