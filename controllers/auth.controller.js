@@ -82,7 +82,7 @@ export const login = async (req ,res) =>{
         // Set token as cookie
         res.cookie('token', token, {
             httpOnly: true,     // Prevents XSS attacks
-            secure: false,      // Set to true in production with HTTPS
+            secure: true,      // Set to true in production with HTTPS
            sameSite: 'none' ,
             maxAge: 60 * 60 * 1000  // 1 hour in milliseconds
         });

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import AddItemForm from './components/AddItemForm';
 
-const apiUrl = process.env.VITE_API_URL;
+const apiUrl = 'https://inventorymanagement-lej0.onrender.com';
 
 const Logo = () => (
   <div className="logo-circle">
