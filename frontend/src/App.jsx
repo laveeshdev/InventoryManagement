@@ -313,14 +313,12 @@ function App() {
       }
     };
 
-    // Update List Page Component
+    // Update List Page Component (modern card style, two buttons)
     const UpdateListPage = () => (
       <div className="update-list-page">
         <div className="update-list-header">
-          <h1>Update Inventory</h1>
-          <p>Select an item to update or delete from your inventory</p>
+          <h1>Select an Item</h1>
         </div>
-        
         {loading ? (
           <div className="loading">Loading products...</div>
         ) : error ? (
@@ -336,22 +334,14 @@ function App() {
         ) : (
           <div className="update-products-list">
             {products.map((prod) => (
-              <div key={prod._id} className="update-product-card">
-                <div className="product-info">
-                  <h3>{prod.name}</h3>
-                  <div className="product-meta">
-                    <span className="product-type">Type: {prod.type}</span>
-                    <span className="product-sku">SKU: {prod.sku}</span>
-                    <span className="product-quantity">Current Qty: {prod.quantity}</span>
-                    <span className="product-price">Price: ${prod.price}</span>
-                  </div>
-                  {prod.description && (
-                    <p className="product-description">{prod.description}</p>
-                  )}
+              <div key={prod._id} className="update-product-item">
+                <div>
+                  <div style={{fontWeight:700, fontSize:'1.15rem', marginBottom:2}}>{prod.name}</div>
+                  <div style={{color:'#555', fontSize:'1rem'}}>Current quantity: {prod.quantity}</div>
                 </div>
-                <div className="product-actions">
+                <div style={{display:'flex', gap:'0.7rem'}}>
                   <button
-                    className="select-btn"
+                    className="update-qty-btn"
                     onClick={() => {
                       setSelectedProduct(prod);
                       setCurrentView('updatequantity');
@@ -360,7 +350,7 @@ function App() {
                     Select
                   </button>
                   <button
-                    className="delete-btn"
+                    className="delete-product-btn"
                     onClick={() => {
                       setProductToDelete(prod);
                       setShowDeleteConfirm(true);
