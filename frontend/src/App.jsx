@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import './App.css';
 import AddItemForm from './components/AddItemForm';
@@ -23,6 +21,60 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check authentication status on app load
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        // Try to fetch user profile to verify authentication
+        const res = await fetch('http://localhost:3000/api/v1/product/list', {
+          credentials: 'include',
+        });
+        
+        if (res.ok) {
+          // If we can access protected routes, user is authenticated
+          // Try to get user info from localStorage if available
+          const savedUser = localStorage.getItem('user');
+          if (savedUser) {
+            setUser(JSON.parse(savedUser));
+          }
+          setIsLoggedIn(true);
+        } else {
+          // Clear any saved user data
+          localStorage.removeItem('user');
+          setIsLoggedIn(false);
+          setUser(null);
+        }
+      } catch (err) {
+        localStorage.removeItem('user');
+        setIsLoggedIn(false);
+        setUser(null);
+      }
+      setIsCheckingAuth(false);
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      // Call logout API to clear server-side session/cookies
+      await fetch('http://localhost:3000/api/v1/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (err) {
+      // Continue with logout even if API call fails
+      console.log('Logout API call failed, but continuing with local logout');
+    }
+    
+    // Clear local storage and state
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    setUser(null);
+    setLoginData({ username: '', password: '' });
+  };
 
   const handleInputChange = (e, form) => {
     const { name, value } = e.target;
@@ -50,6 +102,10 @@ function App() {
         setMessage('Login successful!');
         setIsLoggedIn(true);
         setUser(data.data?.user || null);
+        // Save user data to localStorage for persistence
+        if (data.data?.user) {
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+        }
       } else {
         setMessage(data.message || 'Login failed.');
       }
@@ -110,6 +166,7 @@ function App() {
       reason: ''
     });
     const [updateMessage, setUpdateMessage] = useState('');
+    const [quantityInput, setQuantityInput] = useState('');
 
     const fetchProducts = async () => {
       setLoading(true);
@@ -256,60 +313,15 @@ function App() {
           setProductToDelete(null);
         } else {
           alert(data.message || 'Failed to delete product.');
+          // Close the modal even if delete failed
+          setShowDeleteConfirm(false);
+          setProductToDelete(null);
         }
       } catch (err) {
         alert('Network error.');
-      }
-    };
-
-    // Update Quantity Function
-    const handleUpdateQuantity = async (e) => {
-      e.preventDefault();
-      setUpdateMessage('');
-      
-      if (!selectedProduct || !updateQuantityForm.quantity || Number(updateQuantityForm.quantity) <= 0) {
-        setUpdateMessage('Please enter a valid quantity.');
-        return;
-      }
-
-      let newQuantity = selectedProduct.quantity;
-      const actionQuantity = Number(updateQuantityForm.quantity);
-
-      switch (updateQuantityForm.action) {
-        case 'adjust':
-          newQuantity = actionQuantity;
-          break;
-        case 'sale':
-          newQuantity = Math.max(0, selectedProduct.quantity - actionQuantity);
-          break;
-        case 'purchase':
-          newQuantity = selectedProduct.quantity + actionQuantity;
-          break;
-        default:
-          break;
-      }
-
-      try {
-        const res = await fetch(`http://localhost:3000/api/v1/product/${selectedProduct._id}/quantity`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ quantity: newQuantity })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          setUpdateMessage('Quantity updated successfully!');
-          fetchProducts();
-          setTimeout(() => {
-            setCurrentView('updatelist');
-            setUpdateMessage('');
-            setUpdateQuantityForm({ action: 'adjust', quantity: '', reason: '' });
-          }, 1500);
-        } else {
-          setUpdateMessage(data.message || 'Failed to update quantity.');
-        }
-      } catch (err) {
-        setUpdateMessage('Network error.');
+        // Close the modal even if there was a network error
+        setShowDeleteConfirm(false);
+        setProductToDelete(null);
       }
     };
 
@@ -348,6 +360,7 @@ function App() {
                     style={{width:'90px'}}
                     onClick={() => {
                       setSelectedProduct(prod);
+                      setQuantityInput(''); // Clear the input when selecting a new product
                       setCurrentView('updatequantity');
                     }}
                   >
@@ -380,7 +393,57 @@ function App() {
           <p>Current quantity: <strong>{selectedProduct?.quantity}</strong></p>
         </div>
         <div className="update-quantity-form-container">
-          <form className="update-quantity-form" onSubmit={handleUpdateQuantity} autoComplete="off">
+          <form className="update-quantity-form" onSubmit={(e) => {
+            e.preventDefault();
+            setUpdateMessage('');
+            
+            if (!selectedProduct || !quantityInput || Number(quantityInput) <= 0) {
+              setUpdateMessage('Please enter a valid quantity.');
+              return;
+            }
+
+            let newQuantity = selectedProduct.quantity;
+            const actionQuantity = Number(quantityInput);
+
+            switch (updateQuantityForm.action) {
+              case 'adjust':
+                newQuantity = actionQuantity;
+                break;
+              case 'sale':
+                newQuantity = Math.max(0, selectedProduct.quantity - actionQuantity);
+                break;
+              case 'purchase':
+                newQuantity = selectedProduct.quantity + actionQuantity;
+                break;
+              default:
+                break;
+            }
+
+            fetch(`http://localhost:3000/api/v1/product/${selectedProduct._id}/quantity`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ quantity: newQuantity })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                setUpdateMessage('Quantity updated successfully!');
+                fetchProducts();
+                setTimeout(() => {
+                  setCurrentView('updatelist');
+                  setUpdateMessage('');
+                  setUpdateQuantityForm({ action: 'adjust', quantity: '', reason: '' });
+                  setQuantityInput('');
+                }, 1500);
+              } else {
+                setUpdateMessage(data.message || 'Failed to update quantity.');
+              }
+            })
+            .catch(() => {
+              setUpdateMessage('Network error.');
+            });
+          }} autoComplete="off">
             <div className="update-type-section">
               <h3>Transaction Type</h3>
               <div className="update-type-buttons">
@@ -416,15 +479,16 @@ function App() {
             <div className="new-quantity-section">
               <h3>Quantity</h3>
               <input
-                type="number"
+                type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 placeholder="Enter quantity"
-                value={updateQuantityForm.quantity}
+                value={quantityInput}
                 onChange={e => {
-                  // Only allow numbers, prevent leading zeros
-                  const val = e.target.value.replace(/[^0-9]/g, '');
-                  setUpdateQuantityForm(form => ({ ...form, quantity: val.replace(/^0+(?!$)/, '') }));
+                  const val = e.target.value;
+                  if (/^\d*$/.test(val)) {
+                    setQuantityInput(val.replace(/^0+(?!$)/, ''));
+                  }
                 }}
                 required
                 min={1}
@@ -492,7 +556,9 @@ function App() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to add product');
-      // Optionally refresh products or navigate
+      // Refresh the products list to show the new item
+      await fetchProducts();
+      // Navigate back to dashboard
       setCurrentView('dashboard');
     };
 
@@ -511,7 +577,7 @@ function App() {
             </div>
             <div className="nav-right">
               <span className="welcome-text">Welcome, {user?.name || user?.username || 'User'}</span>
-              <button className="logout-btn" onClick={() => { setIsLoggedIn(false); setUser(null); setLoginData({ username: '', password: '' }); }}>
+              <button className="logout-btn" onClick={handleLogout}>
                 <span>🚪</span>
               </button>
             </div>
@@ -539,7 +605,7 @@ function App() {
             </div>
             <div className="nav-right">
               <span className="welcome-text">Welcome, {user?.name || user?.username || 'User'}</span>
-              <button className="logout-btn" onClick={() => { setIsLoggedIn(false); setUser(null); setLoginData({ username: '', password: '' }); }}>
+              <button className="logout-btn" onClick={handleLogout}>
                 <span>🚪</span>
               </button>
             </div>
@@ -567,7 +633,7 @@ function App() {
             </div>
             <div className="nav-right">
               <span className="welcome-text">Welcome, {user?.name || user?.username || 'User'}</span>
-              <button className="logout-btn" onClick={() => { setIsLoggedIn(false); setUser(null); setLoginData({ username: '', password: '' }); }}>
+              <button className="logout-btn" onClick={handleLogout}>
                 <span>🚪</span>
               </button>
             </div>
@@ -598,7 +664,7 @@ function App() {
             </div>
             <div className="nav-right">
               <span className="welcome-text">Welcome, {user?.name || user?.username || 'User'}</span>
-              <button className="logout-btn" onClick={() => { setIsLoggedIn(false); setUser(null); setLoginData({ username: '', password: '' }); }}>
+              <button className="logout-btn" onClick={handleLogout}>
                 <span>🚪</span>
               </button>
             </div>
@@ -620,7 +686,7 @@ function App() {
           </div>
           <div className="nav-right">
             <span className="welcome-text">Welcome, {user?.name || user?.username || 'User'}</span>
-            <button className="logout-btn" onClick={() => { setIsLoggedIn(false); setUser(null); setLoginData({ username: '', password: '' }); }}>
+            <button className="logout-btn" onClick={handleLogout}>
               <span>🚪</span>
             </button>
           </div>
@@ -701,6 +767,21 @@ function App() {
       </div>
     );
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#666'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   if (isLoggedIn) {
     return <Dashboard />;

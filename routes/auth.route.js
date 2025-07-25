@@ -7,6 +7,11 @@ authRouter.post('/login' , login);
 
 authRouter.post('/signup', signUp);
 
+
+authRouter.post('/logout', (req, res) => {
+    res.clearCookie('token').json({ success: true, message: 'Logged out successfully' });
+});
+
 authRouter.get('/logout', (req, res) => {
     res.clearCookie('token').redirect('/');
 });
