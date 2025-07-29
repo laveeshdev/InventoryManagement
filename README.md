@@ -132,6 +132,15 @@ JWT_SECRET=your_jwt_secret_key_here
 - **PUT** `/api/v1/product/:id/quantity`: Update product quantity
 - **DELETE** `/api/v1/product/:id`: Delete a product
 
+## SWAGGER
+
+Interactive API documentation is available using Swagger UI.
+
+- After starting the backend server, open your browser and go to:
+  - [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+- You can view, test, and explore all available API endpoints directly from the Swagger UI.
+- The documentation is auto-generated from JSDoc comments in the route files.
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request.
