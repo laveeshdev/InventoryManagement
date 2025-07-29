@@ -1,44 +1,43 @@
-version:  '3'
+version: '3.8'
+
 services:
   mongodb:
     image: mongo:latest
     container_name: inventory_mongodb
-    restart: always
     ports:
       - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password123
-      - MONGO_INITDB_DATABASE=inventory_db
     volumes:
       - mongodb_data:/data/db
     networks:
       - inventory_network
 
   backend:
-    image: laveeshdev/inventorypro-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inventory_backend
     ports:
       - "3000:3000"
-    env_file:
-      - .env
-    environment:
-      # if .env file is not present
-      - PORT=${PORT:-3000}
-      - MONGO_URI=${MONGO_URI:-mongodb://mongodb:27017/inventory_db}
-      - JWT_SECRET=${JWT_SECRET:-demo_jwt_secret_change_in_production}
     depends_on:
       - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/inventory_db
+      - PORT=3000
+      - JWT_SECRET=your_secret_key
     networks:
       - inventory_network
 
   frontend:
-    image: laveeshdev/inventorypro-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inventory_frontend
     ports:
       - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:3000
     depends_on:
       - backend
+    environment:
+      - VITE_API_URL=http://backend:3000
     networks:
       - inventory_network
 
