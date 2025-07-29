@@ -62,7 +62,7 @@ services:
       - inventory_network
 
   backend:
-    image: laveeshdev/inventory-backend
+    image: laveeshdev/inventorypro-backend
     container_name: inventory_backend
     ports:
       - "3000:3000"
@@ -76,7 +76,7 @@ services:
       - inventory_network
 
   frontend:
-    image: laveeshdev/inventory-frontend
+    image: laveeshdev/inventorypro-frontend
     container_name: inventory_frontend
     ports:
       - "5173:5173"
