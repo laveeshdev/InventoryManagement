@@ -77,6 +77,7 @@ InventoryManagement/
 5. Navigate to the `frontend` folder and start the React app:
    ```bash
    cd frontend
+   npm i
    npm start
    ```
 
