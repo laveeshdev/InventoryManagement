@@ -96,6 +96,7 @@ InventoryManagement/
 
 ## Access Points
 
+- **Deployed Project**: [https://inventorymanagement-front.onrender.com/](https://inventorymanagement-front.onrender.com/)
 - **Backend API**: [http://localhost:3000](http://localhost:3000)
 - **Frontend**: [http://localhost:5173](http://localhost:5173)
 - **MongoDB**: Accessible at `localhost:27017` (local container)
