@@ -1,3 +1,53 @@
+# version: '3.8'
+
+# services:
+#   mongodb:
+#     image: mongo:latest
+#     container_name: inventory_mongodb
+#     ports:
+#       - "27017:27017"
+#     volumes:
+#       - mongodb_data:/data/db
+#     networks:
+#       - inventory_network
+
+#   backend:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: inventory_backend
+#     ports:
+#       - "3000:3000"
+#     depends_on:
+#       - mongodb
+#     environment:
+#       - MONGO_URI=mongodb://mongodb:27017/inventory_db
+#       - PORT=3000
+#       - JWT_SECRET=your_secret_key
+#     networks:
+#       - inventory_network
+
+#   frontend:
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile
+#     container_name: inventory_frontend
+#     ports:
+#       - "5173:5173"
+#     depends_on:
+#       - backend
+#     environment:
+#       - VITE_API_URL=http://backend:3000
+#     networks:
+#       - inventory_network
+
+# volumes:
+#   mongodb_data:
+
+# networks:
+#   inventory_network:
+#     driver: bridge
+
 version: '3.8'
 
 services:
@@ -12,9 +62,7 @@ services:
       - inventory_network
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: laveeshdev/inventory-backend
     container_name: inventory_backend
     ports:
       - "3000:3000"
@@ -28,9 +76,7 @@ services:
       - inventory_network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: laveeshdev/inventory-frontend
     container_name: inventory_frontend
     ports:
       - "5173:5173"
