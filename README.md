@@ -28,53 +28,71 @@ InventoryManagement/
 ├── app.js
 ├── package.json
 ├── config/
-│   ├── connectionDb.js
-│   ├── env.js
 ├── controllers/
-│   ├── auth.controller.js
-│   ├── listing.controller.js
 ├── middleware/
-│   ├── auth.js
 ├── models/
-│   ├── listing.js
-│   ├── user.js
 ├── routes/
-│   ├── auth.route.js
-│   ├── product.route.js
 ├── frontend/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── components/
-│   │   │   ├── AddItemForm.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── InventoryPage.jsx
-│   │   │   ├── UpdateListPage.jsx
-│   │   │   ├── UpdateQuantityPage.jsx
-│   │   │   ├── DeleteConfirmModal.jsx
-│   │   ├── App.css
-│   │   ├── index.js
 ```
 
 ## Installation
 
-### Prerequisites
+### Method 1: Manual (npm) Setup
 
-- Docker installed on your machine
-
-### Steps
-
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/laveeshdev/InventoryManagement.git
-   ```
-2. Navigate to the project directory:
-   ```bash
    cd InventoryManagement
    ```
-3. Run the application using Docker Compose:
+2. **Set up environment variables:**
+   - Copy `.env.example` to `.env` in the root directory and fill in the required values.
+3. **Install backend dependencies:**
    ```bash
-   docker-compose up
+   npm install
    ```
+4. **Start the backend server:**
+   ```bash
+   npm run dev
+   ```
+5. **Install frontend dependencies:**
+   ```bash
+   cd frontend
+   npm install
+   ```
+6. **Start the frontend server:**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+### Method 2: Docker Compose Setup
+
+1. **Get the latest `docker-compose.yml`:**
+   - **Linux/macOS:**
+     ```bash
+     curl -O https://raw.githubusercontent.com/laveeshdev/InventoryManagement/main/docker-compose.yml
+     # or
+     wget https://raw.githubusercontent.com/laveeshdev/InventoryManagement/main/docker-compose.yml
+     ```
+   - **Windows (PowerShell):**
+     ```powershell
+     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/laveeshdev/InventoryManagement/main/docker-compose.yml" -OutFile "docker-compose.yml"
+     ```
+2. **Run the application using Docker Compose:**
+   - **Linux/macOS:**
+     ```bash
+     docker-compose up -d
+     ```
+   - **Windows (PowerShell):**
+     ```powershell
+     docker-compose up -d
+     ```
+3. **Access the app:**
+   - Backend API: [http://localhost:3000](http://localhost:3000)
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+
+---
 
 ## Access Points
 
