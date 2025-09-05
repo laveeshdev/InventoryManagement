@@ -4,10 +4,11 @@ import connectionToDatabase from './config/connectionDb.js';
 import config from './config/env.js';
 import { authRouter } from './routes/auth.route.js';
 import { productRouter } from './routes/product.route.js';
+import { partyRouter } from './routes/party.route.js';
+import { transactionRouter } from './routes/transaction.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
+
 
 
 dotenv.config();
@@ -20,30 +21,12 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Swagger setup
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Inventory Management API',
-      version: '1.0.0',
-      description: 'API documentation for Inventory Management System',
-    },
-    servers: [
-      { url: 'http://localhost:3000', description: 'Local server' },
-    ],
-  },
-  apis: ['./routes/*.js'], // Path to the API docs
-};
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/product', productRouter);
-
-
-
-
+app.use('/api/v1/party' , partyRouter);
+app.use('/api/v1/transaction' , transactionRouter);
 
 
 app.get('/' , (req,res)=>{
