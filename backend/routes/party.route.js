@@ -1,13 +1,15 @@
 import { Router } from "express";
+import { createParty } from "../controllers/party.controller.js";
+import { authenticateToken } from "../middleware/auth.js";
+
+
 const partyRouter = Router();
 
 partyRouter.get('/' , (req, res) => {
     res.send("get parties ");
 });
 
-partyRouter.post('/add' , (req ,res) => {
-    res.send("add party") ; 
-}) ;
+partyRouter.post('/add' ,authenticateToken, createParty) ;
 
 partyRouter.put('/delete/:id' , (req , res) => {
     res.send("delete party") ;
