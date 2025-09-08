@@ -1,14 +1,12 @@
- import { Router } from "express";
+import { Router } from "express";
+import { authenticateToken } from "../middleware/auth.js";
+import { createTransaction, getAllTransactions } from "../controllers/transaction.controller.js";
 
 const transactionRouter = Router();
 
-transactionRouter.get('/' , (req, res) => {
-    res.send("get transactions ");
-});
+transactionRouter.get('/' , authenticateToken , getAllTransactions);
 
-transactionRouter.post('/add' , (req ,res) => {
-    res.send("add transaction") ; 
-}) ;   
+transactionRouter.post('/add' , authenticateToken , createTransaction ) ;   
 transactionRouter.put('/delete/:id' , (req , res) => {
     res.send("delete transaction") ;
 }) ; 
