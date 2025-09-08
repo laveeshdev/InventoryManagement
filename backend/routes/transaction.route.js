@@ -1,19 +1,15 @@
 import { Router } from "express";
 import { authenticateToken } from "../middleware/auth.js";
-import { createTransaction, getAllTransactions } from "../controllers/transaction.controller.js";
+import { createTransaction, deleteTransactionById, getAllTransactions, updateTransactionById } from "../controllers/transaction.controller.js";
 
 const transactionRouter = Router();
 
 transactionRouter.get('/' , authenticateToken , getAllTransactions);
 
 transactionRouter.post('/add' , authenticateToken , createTransaction ) ;   
-transactionRouter.put('/delete/:id' , (req , res) => {
-    res.send("delete transaction") ;
-}) ; 
+transactionRouter.put('/delete/:id' , authenticateToken , deleteTransactionById) ; 
 
-transactionRouter.put('/update/:id' , (req , res) => {
-    res.send("update transaction") ;
-}) ;
+transactionRouter.put('/update/:id' , authenticateToken , updateTransactionById) ;
 
 
 export { transactionRouter };

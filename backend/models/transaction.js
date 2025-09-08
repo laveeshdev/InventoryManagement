@@ -13,17 +13,19 @@ const transactionSchema = new mongoose.Schema({
         ref : "Party" ,
         required : true
     } ,
-    items : {
-        type : [mongoose.Schema.Types.ObjectId] ,
-        ref : "Listing" ,
-        required : true
-    } ,
+    items : [
+        {
+            listing: { type: mongoose.Schema.Types.ObjectId, ref: "Listing", required: true },
+            quantity: { type: Number, required: true },
+            amount: { type: Number, required: true }
+        }
+    ] ,
     paymentStatus : {
         type : String ,
         enum : ["pending" , "completed" ] ,
         default : "pending"
     } , 
-    amount : {
+    totalAmount : {
         type : Number ,
         required : true
     } , 
@@ -47,6 +49,16 @@ const transactionSchema = new mongoose.Schema({
     }
 
 
+}) ; 
+
+transactionSchema.pre('save' , async function(next) {
+    let total = 0 ; 
+    this.items.forEach(item => {
+        total += item.amount * item.quantity ;
+    })
+
+    this.totalAmount = total ;
+    next() ;
 }) ; 
 
 const Transaction = mongoose.model("Transaction" , transactionSchema) ;
