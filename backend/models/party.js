@@ -1,10 +1,15 @@
 import mongoose from "mongoose" ; 
 
 const partiesSchema = new mongoose.Schema({
+    owner : {
+        type : mongoose.Schema.Types.ObjectId ,
+        ref : "User" ,
+        required : true
+    } ,
     name : {
         type : String ,
-        required : true , 
-        trim : true 
+        required : true ,
+        trim : true
     },
     email : {
         type : String ,
@@ -12,6 +17,7 @@ const partiesSchema = new mongoose.Schema({
         trim : true ,
         unique : true
     } , 
+   
     phone : {
         type : Number ,
         required : true ,

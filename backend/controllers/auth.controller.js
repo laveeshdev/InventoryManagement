@@ -39,7 +39,8 @@ export const signUp = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: "Error signing up user", error });
+        console.log(error.message);
+        res.status(500).json({ message: "Error signing up user", error: error.message });
     }
 }
 
@@ -83,6 +84,6 @@ export const login = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: "Error logging in user", error });
+        res.status(500).json({ message: error.message, error });
     }
 }

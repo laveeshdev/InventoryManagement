@@ -1,27 +1,19 @@
 import { Router } from "express";
-import { createParty } from "../controllers/party.controller.js";
+import { createParty, deletePartyById, getAllParties, getPartyById, updatePartyById } from "../controllers/party.controller.js";
 import { authenticateToken } from "../middleware/auth.js";
 
 
 const partyRouter = Router();
 
-partyRouter.get('/' , (req, res) => {
-    res.send("get parties ");
-});
+partyRouter.get('/' , authenticateToken , getAllParties);
 
-partyRouter.post('/add' ,authenticateToken, createParty) ;
+partyRouter.post('/add' ,authenticateToken , createParty) ;
 
-partyRouter.put('/delete/:id' , (req , res) => {
-    res.send("delete party") ;
-})
+partyRouter.delete('/delete/:id' ,authenticateToken , deletePartyById)
 
-partyRouter.put('/update/:id' , (req , res) => {
-    res.send("update party") ;
-}) ;
+partyRouter.put('/update/:id' , authenticateToken , updatePartyById) ;
 
-partyRouter.get('/:id' , (req , res) => {
-    res.send("get party by id") ;
-}) ;
+partyRouter.get('/:id' , authenticateToken , getPartyById) ;
 
 
 
