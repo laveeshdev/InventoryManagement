@@ -3,6 +3,11 @@ import Party from "./party.js";
 
 
 const transactionSchema = new mongoose.Schema({
+    owner : {
+        type : mongoose.Schema.Types.ObjectId , 
+        ref : "User" , 
+        required : true
+    },
     party : {
         type : mongoose.Schema.Types.ObjectId , 
         ref : "Party" ,
