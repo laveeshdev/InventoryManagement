@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional Business Dashboard Design System */
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 0 0% 100%;
+    --foreground: 225 25% 15%;
+
+    /* Business color palette */
+    --primary: 217 91% 60%;
+    --primary-hover: 217 91% 55%;
+    --primary-foreground: 0 0% 98%;
+    
+    /* Professional grays */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 25% 15%;
+
+    /* Secondary colors */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 225 25% 15%;
+
+    /* Accent colors */
+    --accent: 142 86% 28%;
+    --accent-hover: 142 86% 24%;
+    --accent-foreground: 0 0% 98%;
+
+    /* Status colors */
+    --success: 142 86% 28%;
+    --success-foreground: 0 0% 98%;
+    --warning: 48 100% 67%;
+    --warning-foreground: 225 25% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* UI elements */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 25% 15%;
+
+    /* Sidebar design */
+    --sidebar-background: 225 25% 15%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 225 25% 20%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 225 25% 20%;
+    --sidebar-ring: 217 91% 60%;
+
+    /* Design tokens */
+    --radius: 0.75rem;
+    --shadow-sm: 0 1px 2px 0 hsl(220 43% 11% / 0.05);
+    --shadow: 0 4px 6px -1px hsl(220 43% 11% / 0.1), 0 2px 4px -1px hsl(220 43% 11% / 0.06);
+    --shadow-lg: 0 20px 25px -5px hsl(220 43% 11% / 0.1), 0 10px 10px -5px hsl(220 43% 11% / 0.04);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 55%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 14% 98%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(225 25% 15%), hsl(225 25% 12%));
+  }
+
+  .dark {
+    --background: 225 25% 8%;
+    --foreground: 220 14% 96%;
+    --card: 225 25% 10%;
+    --card-foreground: 220 14% 96%;
+    --popover: 225 25% 10%;
+    --popover-foreground: 220 14% 96%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 225 25% 12%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 225 25% 12%;
+    --muted-foreground: 220 9% 65%;
+    --accent: 142 86% 28%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 225 25% 15%;
+    --input: 225 25% 15%;
+    --ring: 217 91% 60%;
+    --sidebar-background: 225 25% 6%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 225 25% 10%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 225 25% 12%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/50 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+}
+
+@layer components {
+  /* Custom shadows using design tokens */
+  .shadow-custom {
+    box-shadow: var(--shadow);
+  }
+
+  .shadow-custom-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Dashboard card gradient */
+  .card-gradient {
+    background: var(--gradient-card);
+  }
+
+  /* Sidebar gradient */
+  .sidebar-gradient {
+    background: var(--gradient-sidebar);
+  }
+}
