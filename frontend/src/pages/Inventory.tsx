@@ -3,6 +3,7 @@ import { productApi } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -38,10 +39,22 @@ export default function Inventory() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    type: "",
+    sku: "",
+    image_url: "",
+    description: "",
+    quantity: "",
+    price: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isEditQuantityDialogOpen, setIsEditQuantityDialogOpen] = useState(false);
+  const [newQuantity, setNewQuantity] = useState("");
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchProducts = async () => {
+  const fetchProducts = async () => {
       try {
         const response = await productApi.getAll();
         console.log("API Response:", response.data); // Log the full response
@@ -66,8 +79,120 @@ export default function Inventory() {
       }
     };
 
+  useEffect(() => {
     fetchProducts();
-  }, [toast]);
+  }, []);
+
+  const handleNewProductChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    // Correctly map the id 'product-name' to the state key 'name'
+    const key = id.replace('product-', '');
+    setNewProduct((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleAddProduct = async () => {
+    if (!newProduct.name || !newProduct.sku || !newProduct.quantity || !newProduct.price || !newProduct.type) {
+      toast({
+        title: "Missing Fields",
+        description: "Please fill out all required fields to add a product.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const productData = {
+        name: newProduct.name,
+        sku: newProduct.sku,
+        type: newProduct.type,
+        image_url: newProduct.image_url,
+        description: newProduct.description,
+        quantity: Number(newProduct.quantity),
+        price: Number(newProduct.price),
+      };
+      const response = await productApi.create(productData);
+      if (response.data.success) {
+        toast({
+          title: "Success!",
+          description: "New product has been added.",
+        });
+        setProducts(prev => [...prev, response.data.data]);
+        setIsAddDialogOpen(false);
+        setNewProduct({ name: "", type: "", sku: "", image_url: "", description: "", quantity: "", price: "" }); // Reset form
+      } else {
+        toast({
+          title: "Error",
+          description: response.data.message || "Failed to add product.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Request Error",
+        description: "An error occurred while adding the product.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditClick = (product: Product) => {
+    setEditingProduct(product);
+    setNewQuantity(product.quantity.toString());
+    setIsEditQuantityDialogOpen(true);
+  };
+
+  const handleUpdateQuantity = async () => {
+    if (!editingProduct) return;
+    
+    setIsSubmitting(true);
+    try {
+      const quantity = parseInt(newQuantity);
+      if (isNaN(quantity) || quantity < 0) {
+        toast({
+          title: "Invalid Quantity",
+          description: "Please enter a valid non-negative quantity.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await productApi.updateQuantity(editingProduct._id, quantity);
+      if (response.data.success) {
+        toast({
+          title: "Success!",
+          description: "Product quantity has been updated.",
+        });
+        
+        // Update the product in the local state
+        setProducts(prevProducts => 
+          prevProducts.map(p => 
+            p._id === editingProduct._id 
+              ? { ...p, quantity: quantity } 
+              : p
+          )
+        );
+        
+        setIsEditQuantityDialogOpen(false);
+        setEditingProduct(null);
+      } else {
+        toast({
+          title: "Error",
+          description: response.data.message || "Failed to update product quantity.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Request Error",
+        description: "An error occurred while updating the product quantity.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const filteredProducts = products.filter(
     (product) =>
@@ -126,31 +251,45 @@ export default function Inventory() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="product-name">Product Name</Label>
-                <Input id="product-name" placeholder="Enter product name" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="product-name">Product Name</Label>
+                  <Input id="product-name" placeholder="e.g. T-Shirt" value={newProduct.name} onChange={handleNewProductChange} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="product-type">Type / Category</Label>
+                  <Input id="product-type" placeholder="e.g. Apparel" value={newProduct.type} onChange={handleNewProductChange} />
+                </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="product-sku">SKU</Label>
-                <Input id="product-sku" placeholder="Enter SKU" />
+                <Input id="product-sku" placeholder="Enter SKU" value={newProduct.sku} onChange={handleNewProductChange} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="product-description">Description</Label>
+                <Textarea id="product-description" placeholder="Enter product description" value={newProduct.description} onChange={handleNewProductChange} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="product-image_url">Image URL</Label>
+                <Input id="product-image_url" placeholder="https://example.com/image.png" value={newProduct.image_url} onChange={handleNewProductChange} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="product-quantity">Quantity</Label>
-                  <Input id="product-quantity" type="number" placeholder="0" />
+                  <Input id="product-quantity" type="number" placeholder="0" value={newProduct.quantity} onChange={handleNewProductChange} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="product-price">Price</Label>
-                  <Input id="product-price" type="number" step="0.01" placeholder="0.00" />
+                  <Input id="product-price" type="number" step="0.01" placeholder="0.00" value={newProduct.price} onChange={handleNewProductChange} />
                 </div>
               </div>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button onClick={() => setIsAddDialogOpen(false)}>
-                Add Product
+              <Button onClick={handleAddProduct} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Product"}
               </Button>
             </div>
           </DialogContent>
@@ -254,7 +393,7 @@ export default function Inventory() {
                     {getStatusBadge(product.quantity)}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleEditClick(product)}>
                       <Edit3 className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -264,6 +403,47 @@ export default function Inventory() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Quantity Dialog */}
+      {editingProduct && (
+        <Dialog open={isEditQuantityDialogOpen} onOpenChange={setIsEditQuantityDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Update Quantity</DialogTitle>
+              <DialogDescription>
+                Update the quantity for {editingProduct.name} (SKU: {editingProduct.sku})
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-quantity">New Quantity</Label>
+                <Input 
+                  id="edit-quantity" 
+                  type="number" 
+                  min="0" 
+                  value={newQuantity}
+                  onChange={(e) => setNewQuantity(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditQuantityDialogOpen(false)} 
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateQuantity} 
+                disabled={isSubmitting || newQuantity === editingProduct.quantity.toString()}
+              >
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Quantity"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
