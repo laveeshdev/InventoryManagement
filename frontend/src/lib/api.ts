@@ -84,6 +84,7 @@ export const partyApi = {
     email?: string;
     phone?: string;
     address?: string;
+    balance?: number;
   }) => api.post('/api/v1/party/add', partyData),
   
   update: (id: string, partyData: Partial<{
@@ -92,6 +93,7 @@ export const partyApi = {
     email: string;
     phone: string;
     address: string;
+    balance: number;
   }>) => api.put(`/api/v1/party/update/${id}`, partyData),
   
   delete: (id: string) => api.delete(`/api/v1/party/delete/${id}`),
@@ -102,14 +104,18 @@ export const transactionApi = {
   getAll: () => api.get('/api/v1/transaction/'),
   
   create: (transactionData: {
-    type: 'sale' | 'purchase';
-    partyId: string;
-    products: Array<{
-      productId: string;
+    party: string;
+    items: Array<{
+      listing: string;
       quantity: number;
-      price: number;
+      amount: number;
     }>;
+    paymentStatus: string;
     totalAmount: number;
+    type: 'sell' | 'buy';
+    invoice: string;
+    date: Date;
+    remarks?: string;
   }) => api.post('/api/v1/transaction/add', transactionData),
   
   update: (id: string, transactionData: any) =>

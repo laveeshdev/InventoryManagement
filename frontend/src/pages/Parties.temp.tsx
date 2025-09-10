@@ -49,15 +49,6 @@ export default function Parties() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newParty, setNewParty] = useState({
-    name: "",
-    type: "customer",
-    email: "",
-    phone: "",
-    address: "",
-    balance: "0"
-  });
   const { toast } = useToast();
   
   useEffect(() => {
@@ -66,20 +57,14 @@ export default function Parties() {
       try {
         const response = await partyApi.getAll();
         console.log("Party API response:", response.data);
-        // The backend directly returns the array of parties, not wrapped in success/data properties
-        if (Array.isArray(response.data)) {
-          setParties(response.data);
-          toast({
-            title: "Success",
-            description: `Loaded ${response.data.length} parties from database`,
-          });
+        if (response.data.success) {
+          setParties(response.data.data);
         } else {
           toast({
             title: "Error",
-            description: "Unexpected response format from server.",
+            description: "Failed to fetch parties.",
             variant: "destructive",
           });
-          console.error("Unexpected response format:", response.data);
         }
       } catch (error) {
         toast({
@@ -120,89 +105,6 @@ export default function Parties() {
 
   const customerCount = parties.filter(p => p.type === "customer").length;
   const sellerCount = parties.filter(p => p.type === "seller").length;
-  
-  const handleNewPartyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    const key = id.replace("party-", "");
-    setNewParty(prev => ({ ...prev, [key]: value }));
-  };
-  
-  const handlePartyTypeChange = (value: string) => {
-    setNewParty(prev => ({ ...prev, type: value as 'customer' | 'seller' }));
-  };
-  
-  const handleAddParty = async () => {
-    // Validate the form
-    if (!newParty.name || !newParty.email || !newParty.phone) {
-      toast({
-        title: "Missing Fields",
-        description: "Please fill out all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newParty.email)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      const partyData = {
-        name: newParty.name,
-        type: newParty.type as 'customer' | 'supplier',
-        email: newParty.email,
-        phone: String(newParty.phone),
-        address: newParty.address || undefined,
-        balance: Number(newParty.balance) || 0
-      };
-      
-      const response = await partyApi.create(partyData);
-      
-      if (response.data && response.data.party) {
-        toast({
-          title: "Success",
-          description: "New party has been added successfully.",
-        });
-        
-        // Add the new party to the state
-        setParties([...parties, response.data.party]);
-        
-        // Close dialog and reset form
-        setIsAddDialogOpen(false);
-        setNewParty({
-          name: "",
-          type: "customer",
-          email: "",
-          phone: "",
-          address: "",
-          balance: "0"
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: response.data.message || "Failed to add party.",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "An error occurred while adding the party.",
-        variant: "destructive",
-      });
-      console.error("Error adding party:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -239,19 +141,13 @@ export default function Parties() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="party-name">Name*</Label>
-                <Input 
-                  id="party-name" 
-                  placeholder="Enter party name" 
-                  value={newParty.name}
-                  onChange={handleNewPartyChange}
-                  required
-                />
+                <Label htmlFor="party-name">Name</Label>
+                <Input id="party-name" placeholder="Enter party name" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="party-type">Type*</Label>
-                <Select value={newParty.type} onValueChange={handlePartyTypeChange}>
-                  <SelectTrigger id="party-type">
+                <Label htmlFor="party-type">Type</Label>
+                <Select>
+                  <SelectTrigger>
                     <SelectValue placeholder="Select party type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -261,60 +157,23 @@ export default function Parties() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="party-email">Email*</Label>
-                <Input 
-                  id="party-email" 
-                  type="email" 
-                  placeholder="Enter email"
-                  value={newParty.email}
-                  onChange={handleNewPartyChange}
-                  required
-                />
+                <Label htmlFor="party-email">Email</Label>
+                <Input id="party-email" type="email" placeholder="Enter email" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="party-phone">Phone*</Label>
-                <Input 
-                  id="party-phone" 
-                  type="tel"
-                  placeholder="Enter phone number"
-                  value={newParty.phone}
-                  onChange={handleNewPartyChange}
-                  required
-                />
+                <Label htmlFor="party-phone">Phone</Label>
+                <Input id="party-phone" placeholder="Enter phone number" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="party-address">Address</Label>
-                <Input 
-                  id="party-address" 
-                  placeholder="Enter address"
-                  value={newParty.address}
-                  onChange={handleNewPartyChange}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="party-balance">Initial Balance</Label>
-                <Input 
-                  id="party-balance" 
-                  type="number"
-                  placeholder="0"
-                  value={newParty.balance}
-                  onChange={handleNewPartyChange}
-                />
+                <Input id="party-address" placeholder="Enter address" />
               </div>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsAddDialogOpen(false)}
-                disabled={isSubmitting}
-              >
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleAddParty}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              <Button onClick={() => setIsAddDialogOpen(false)}>
                 Add Party
               </Button>
             </div>

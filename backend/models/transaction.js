@@ -51,15 +51,15 @@ const transactionSchema = new mongoose.Schema({
 
 }) ; 
 
-transactionSchema.pre('save' , async function(next) {
-    let total = 0 ; 
-    this.items.forEach(item => {
-        total += item.amount * item.quantity ;
-    })
+// transactionSchema.pre('save' , async function(next) {
+//     let total = 0 ; 
+//     this.items.forEach(item => {
+//         total += item.amount * item.quantity ;
+//     })
 
-    this.totalAmount = total ;
-    next() ;
-}) ; 
+//     this.totalAmount = total ;
+//     next() ;
+// }) ; 
 
 const Transaction = mongoose.model("Transaction" , transactionSchema) ;
 

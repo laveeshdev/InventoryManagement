@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
 import Parties from "./pages/Parties";
 import Transactions from "./pages/Transactions";
+import AddTransaction from "./pages/AddTransaction";
 import Reports from "./pages/Reports";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -52,6 +53,11 @@ const App = () => (
             <Route path="/transactions" element={
               <ProtectedRoute>
                 <Layout><Transactions /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/transactions/add" element={
+              <ProtectedRoute>
+                <Layout><AddTransaction /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/reports" element={

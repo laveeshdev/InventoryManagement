@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,64 +29,139 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Filter, ArrowLeftRight, TrendingUp, TrendingDown } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { 
+  Plus, Search, Filter, ArrowLeftRight, TrendingUp, TrendingDown, 
+  Loader2, Eye, AlertCircle 
+} from "lucide-react";
+import { transactionApi, partyApi, productApi } from "@/lib/api";
 
-// Mock data
-const mockTransactions = [
-  {
-    id: "TXN001",
-    type: "sale",
-    party: "ABC Corporation",
-    products: [
-      { name: "Product A", quantity: 10, price: 29.99 },
-      { name: "Product B", quantity: 5, price: 15.50 }
-    ],
-    totalAmount: 377.40,
-    date: "2024-01-15T10:30:00",
-    status: "completed",
-  },
-  {
-    id: "TXN002",
-    type: "purchase",
-    party: "XYZ Suppliers",
-    products: [
-      { name: "Raw Material C", quantity: 100, price: 8.50 }
-    ],
-    totalAmount: 850.00,
-    date: "2024-01-15T14:20:00",
-    status: "completed",
-  },
-    {
-      id: "TXN003",
-      type: "sale",
-      party: "DEF Industries",
-      products: [
-        { name: "Product D", quantity: 20, price: 45.00 },
-        { name: "Product E", quantity: 15, price: 32.50 },
-        { name: "Product F", quantity: 8, price: 75.00 }
-      ],
-      totalAmount: 2087.50,
-      date: "2024-01-14T16:45:00",
-      status: "pending",
-    },
-];
+interface TransactionProduct {
+  productId: string;
+  productName?: string;
+  quantity: number;
+  price: number;
+}
+
+interface Transaction {
+  _id: string;
+  type: 'sell' | 'buy';
+  partyId: string;
+  partyName?: string;
+  products: TransactionProduct[];
+  totalAmount: number;
+  createdAt: string;
+  status: 'pending' | 'completed' | 'cancelled';
+  notes?: string;
+}
+
+interface Party {
+  _id: string;
+  name: string;
+  type: string;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
 
 export default function Transactions() {
-  const [transactions, setTransactions] = useState(mockTransactions);
+  const navigate = useNavigate();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [parties, setParties] = useState<Party[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    // Fetch transactions, parties and products
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [transactionsRes, partiesRes, productsRes] = await Promise.all([
+          transactionApi.getAll(),
+          partyApi.getAll(),
+          productApi.getAll()
+        ]);
+        
+        // Process transactions to add party names and product details
+        const partiesData = Array.isArray(partiesRes.data) ? partiesRes.data : [];
+        const productsData = Array.isArray(productsRes.data) ? productsRes.data : [];
+        
+        // Ensure transactionsData is always an array
+        const rawTransactionsData = transactionsRes.data;
+        let transactionsData = Array.isArray(rawTransactionsData) ? rawTransactionsData : [];
+        
+        // Store parties and products for use in forms
+        setParties(partiesData);
+        setProducts(productsData);
+        
+        // Enhance transaction data with party and product names
+        transactionsData = transactionsData.map(transaction => {
+          // Find party name
+          const party = partiesData.find(p => p._id === transaction.partyId);
+          
+          // Check if products is an array before mapping
+          const products = Array.isArray(transaction.products) ? transaction.products : [];
+          
+          // Enhance products with names
+          const enhancedProducts = products.map(product => {
+            const productDetail = productsData.find(p => p._id === product.productId);
+            return {
+              ...product,
+              productName: productDetail ? productDetail.name : 'Unknown Product'
+            };
+          });
+          
+          return {
+            ...transaction,
+            partyName: party ? party.name : 'Unknown Party',
+            products: enhancedProducts
+          };
+        });
+        
+        setTransactions(transactionsData);
+        
+        toast({
+          title: "Success",
+          description: `Loaded ${transactionsData.length} transactions.`
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load transactions. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [toast]);
 
-  const filteredTransactions = transactions.filter((transaction) => {
+  // Ensure transactions is an array before filtering
+  const transactionsArray = Array.isArray(transactions) ? transactions : [];
+  
+  const filteredTransactions = transactionsArray.filter((transaction) => {
     const matchesSearch = 
-      transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.party.toLowerCase().includes(searchTerm.toLowerCase());
+      (transaction._id?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+      ((transaction.partyName?.toLowerCase().includes(searchTerm.toLowerCase())) || false);
     const matchesType = filterType === "all" || transaction.type === filterType;
     return matchesSearch && matchesType;
   });
 
   const getTypeBadge = (type: string) => {
-    if (type === "sale") {
+    if (type === "sell") {
       return (
         <Badge className="bg-success text-success-foreground">
           <TrendingUp className="h-3 w-3 mr-1" />
@@ -120,14 +197,24 @@ export default function Transactions() {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
+  
+  // View transaction details
+  const viewTransactionDetails = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsDetailsDialogOpen(true);
+  };
 
-  const totalSales = transactions
-    .filter(t => t.type === "sale" && t.status === "completed")
-    .reduce((sum, t) => sum + t.totalAmount, 0);
+  const totalSales = Array.isArray(transactions) ? 
+    transactions
+      .filter(t => t.type === "sell" && t.status === "completed")
+      .reduce((sum, t) => sum + t.totalAmount, 0)
+    : 0;
 
-  const totalPurchases = transactions
-    .filter(t => t.type === "purchase" && t.status === "completed")
-    .reduce((sum, t) => sum + t.totalAmount, 0);
+  const totalPurchases = Array.isArray(transactions) ?
+    transactions
+      .filter(t => t.type === "buy" && t.status === "completed")
+      .reduce((sum, t) => sum + t.totalAmount, 0)
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -141,12 +228,10 @@ export default function Transactions() {
         </div>
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-primary">
-              <Plus className="h-4 w-4 mr-2" />
-              New Transaction
-            </Button>
-          </DialogTrigger>
+          <Button className="bg-gradient-primary" onClick={() => navigate("/transactions/add")}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Transaction
+          </Button>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Create New Transaction</DialogTitle>
@@ -231,7 +316,7 @@ export default function Transactions() {
           <CardContent>
             <div className="text-2xl font-bold text-success">{formatCurrency(totalSales)}</div>
             <p className="text-xs text-muted-foreground">
-              From {transactions.filter(t => t.type === "sale").length} transactions
+              From {Array.isArray(transactions) ? transactions.filter(t => t.type === "sell").length : 0} transactions
             </p>
           </CardContent>
         </Card>
@@ -244,7 +329,7 @@ export default function Transactions() {
           <CardContent>
             <div className="text-2xl font-bold text-accent">{formatCurrency(totalPurchases)}</div>
             <p className="text-xs text-muted-foreground">
-              From {transactions.filter(t => t.type === "purchase").length} transactions
+              From {Array.isArray(transactions) ? transactions.filter(t => t.type === "buy").length : 0} transactions
             </p>
           </CardContent>
         </Card>
@@ -286,57 +371,168 @@ export default function Transactions() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="sale">Sales</SelectItem>
-                  <SelectItem value="purchase">Purchases</SelectItem>
+                  <SelectItem value="sell">Sales</SelectItem>
+                  <SelectItem value="buy">Purchases</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Transaction ID</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Party</TableHead>
-                <TableHead>Products</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTransactions.map((transaction) => (
-                <TableRow key={transaction.id} className="hover:bg-muted/50">
-                  <TableCell className="font-mono text-sm">{transaction.id}</TableCell>
-                  <TableCell>
-                    {getTypeBadge(transaction.type)}
-                  </TableCell>
-                  <TableCell className="font-medium">{transaction.party}</TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {transaction.products.slice(0, 2).map(p => p.name).join(", ")}
-                      {transaction.products.length > 2 && ` +${transaction.products.length - 2} more`}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`font-bold ${
-                      transaction.type === "sale" ? "text-success" : "text-accent"
-                    }`}>
-                      {transaction.type === "sale" ? "+" : "-"}{formatCurrency(transaction.totalAmount)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-sm">{formatDate(transaction.date)}</TableCell>
-                  <TableCell>
-                    {getStatusBadge(transaction.status)}
-                  </TableCell>
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+              <span className="text-muted-foreground">Loading transactions...</span>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">No transactions found</h3>
+              <p className="text-muted-foreground mt-1 mb-4">
+                You haven't made any transactions yet.
+              </p>
+              <Button onClick={() => setIsAddDialogOpen(true)} className="bg-gradient-primary">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Your First Transaction
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Transaction ID</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Party</TableHead>
+                  <TableHead>Products</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[50px]">View</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredTransactions.map((transaction) => (
+                  <TableRow key={transaction._id} className="hover:bg-muted/50">
+                    <TableCell className="font-mono text-sm">{transaction._id.substring(0, 8)}</TableCell>
+                    <TableCell>
+                      {getTypeBadge(transaction.type)}
+                    </TableCell>
+                    <TableCell className="font-medium">{transaction.partyName}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {transaction.products.slice(0, 2).map(p => p.productName).join(", ")}
+                        {transaction.products.length > 2 && ` +${transaction.products.length - 2} more`}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`font-bold ${
+                        transaction.type === "sell" ? "text-success" : "text-accent"
+                      }`}>
+                        {transaction.type === "sell" ? "+" : "-"}{formatCurrency(transaction.totalAmount)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-sm">{formatDate(transaction.createdAt)}</TableCell>
+                    <TableCell>
+                      {getStatusBadge(transaction.status)}
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => viewTransactionDetails(transaction)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
+      
+      {/* Transaction Details Dialog */}
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          {selectedTransaction && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center">
+                  Transaction Details
+                  <span className="ml-2 text-sm font-mono text-muted-foreground">
+                    #{selectedTransaction._id.substring(0, 8)}
+                  </span>
+                </DialogTitle>
+                <DialogDescription>
+                  {formatDate(selectedTransaction.createdAt)}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium mb-1">Transaction Type</h3>
+                    <div>{getTypeBadge(selectedTransaction.type)}</div>
+                  </div>
+                  <div>
+                    <h3 className="font-medium mb-1">Status</h3>
+                    <div>{getStatusBadge(selectedTransaction.status)}</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-1">Party</h3>
+                  <div className="text-lg">{selectedTransaction.partyName}</div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-2">Products</h3>
+                  <div className="border rounded-md overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Product</TableHead>
+                          <TableHead className="text-right">Quantity</TableHead>
+                          <TableHead className="text-right">Price</TableHead>
+                          <TableHead className="text-right">Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedTransaction.products.map((product, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{product.productName}</TableCell>
+                            <TableCell className="text-right">{product.quantity}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(product.price)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(product.quantity * product.price)}</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-right font-medium">Total Amount:</TableCell>
+                          <TableCell className="text-right font-bold">{formatCurrency(selectedTransaction.totalAmount)}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+                
+                {selectedTransaction.notes && (
+                  <div>
+                    <h3 className="font-medium mb-1">Notes</h3>
+                    <div className="text-muted-foreground">{selectedTransaction.notes}</div>
+                  </div>
+                )}
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDetailsDialogOpen(false)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

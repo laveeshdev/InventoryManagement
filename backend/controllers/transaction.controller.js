@@ -3,19 +3,29 @@ import Transaction from "../models/transaction.js";
 
 export const createTransaction = async (req , res) => {
     try {
-        const {  party , items ,paymentStatus , amount , type , invoice , date , remarks } = req.body ;
+        console.log("hi from createTransaction");
+        
+        const {  party , items ,paymentStatus , type , invoice , date , remarks } = req.body ;
 
 
         const owner = req.user._id ;
-        if(!owner || !party || !items || !amount || !type || !invoice ){
+        console.log(owner , party , items , type , invoice , date ,remarks ) ;
+        
+        if(!owner || !party || !items || !type || !invoice ){
             return res.status(400).json({ message : "All fields are required" }) ;
         }
+
+        let totalAmount = 0;
+        if (items && items.length > 0) {
+            totalAmount = items.reduce((acc, item) => acc + (item.quantity * item.amount), 0);
+        }
+
         const newtransaction = new Transaction({
             owner,
             party,
             items,
             paymentStatus,
-            amount,
+            totalAmount,
             type,
             invoice,
             date,
