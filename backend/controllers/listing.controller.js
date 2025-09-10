@@ -4,7 +4,9 @@ import Listing from "../models/listing.js";
 
 
 export const createListing = async (req , res ) => {
+    console.log("hi from createListing");
     try {
+        
         const {name , type , sku , image_url , description, quantity, price} = req.body;
         const owner = req.user._id;
         const existListing = await Listing.findOne({sku}) ; 
@@ -37,6 +39,8 @@ export const createListing = async (req , res ) => {
 
 export const getAllListings = async (req, res) => {
     try {
+        console.log("hi from getAllListings");
+        
         const userId = req.user._id ; 
         console.log("User ID:", userId);
         const listings = await Listing.find({owner : userId}).populate('owner', 'username name email -_id');

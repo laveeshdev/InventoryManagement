@@ -19,7 +19,7 @@ import { initializeDemoData } from "./lib/seedData";
 const queryClient = new QueryClient();
 
 // Initialize demo data on app start
-initializeDemoData();
+// initializeDemoData();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

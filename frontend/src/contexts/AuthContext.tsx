@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authApi } from '@/lib/api';
 import { User } from '@/types/schemas';
+import { AxiosError } from 'axios';
+import {jwtDecode} from 'jwt-decode';
 
 interface AuthContextType {
   user: User | null;
@@ -24,20 +27,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing session on mount
+  // Check for existing session on app load
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('auth_token');
-      const userData = localStorage.getItem('user_data');
-      
-      if (token && userData) {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
         try {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
+          // Verify token with backend and get user profile
+          const response = await authApi.getProfile();
+          if (response.data.success) {
+            setUser(response.data.user);
+          } else {
+            localStorage.removeItem('authToken');
+          }
         } catch (error) {
-          console.error('Error parsing user data:', error);
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user_data');
+          console.error('Failed to fetch user profile:', error);
+          localStorage.removeItem('authToken');
         }
       }
       setLoading(false);
@@ -48,78 +53,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Get users from localStorage
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const response = await authApi.login({ email, password });
       
-      // Find user by email
-      const foundUser = users.find((u: User) => u.email === email);
+      const token = response.data.token;
+      localStorage.setItem('authToken', token);
       
-      if (!foundUser) {
-        return { success: false, error: 'User not found' };
-      }
-      
-      // Simple password check (in real app, use proper hashing)
-      if (foundUser.password !== password) {
-        return { success: false, error: 'Invalid password' };
-      }
-      
-      // Create session
-      const token = `token_${foundUser.id}_${Date.now()}`;
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_data', JSON.stringify(foundUser));
-      
-      setUser(foundUser);
+      // Fetch user profile after login
+      const profileResponse = await authApi.getProfile();
+      setUser(profileResponse.data.user);
       
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Login failed. Please try again.' };
+      const axiosError = error as AxiosError;
+      const errorMessage = (axiosError.response?.data as { message: string })?.message || 'Login failed. Please try again.';
+      return { success: false, error: errorMessage };
     }
   };
 
   const signup = async (userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Get existing users
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const response = await authApi.signup(userData);
       
-      // Check if email already exists
-      if (users.some((u: User) => u.email === userData.email)) {
-        return { success: false, error: 'Email already exists' };
-      }
+      const token = response.data.token;
+      localStorage.setItem('authToken', token);
       
-      // Check if username already exists
-      if (users.some((u: User) => u.username === userData.username)) {
-        return { success: false, error: 'Username already exists' };
-      }
-      
-      // Create new user
-      const newUser: User = {
-        ...userData,
-        id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      // Save to localStorage
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      // Auto-login after signup
-      const token = `token_${newUser.id}_${Date.now()}`;
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_data', JSON.stringify(newUser));
-      
-      setUser(newUser);
+      // Fetch user profile after signup
+      const profileResponse = await authApi.getProfile();
+      setUser(profileResponse.data.user);
       
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Signup failed. Please try again.' };
+      const axiosError = error as AxiosError;
+      const errorMessage = (axiosError.response?.data as { message: string })?.message || 'Signup failed. Please try again.';
+      return { success: false, error: errorMessage };
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
-    setUser(null);
+    authApi.logout().finally(() => {
+      localStorage.removeItem('authToken');
+      setUser(null);
+    });
   };
 
   const value: AuthContextType = {

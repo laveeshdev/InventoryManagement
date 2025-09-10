@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 
 export const signUp = async (req, res) => {
     try {
+        console.log("hi from signup");
+        
         const { name, username, email, password } = req.body;
         const existUser = await User.findOne({ username });
         if (existUser) {
@@ -40,14 +42,16 @@ export const signUp = async (req, res) => {
         });
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ message: "Error signing up user", error: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
 export const login = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username });
+        console.log("hi from login");
+        
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -87,3 +91,11 @@ export const login = async (req, res) => {
         res.status(500).json({ message: error.message, error });
     }
 }
+
+export const getProfile = (req, res) => {
+    // The user object is attached to the request by the authenticateToken middleware.
+    res.status(200).json({
+        success: true,
+        user: req.user 
+    });
+};

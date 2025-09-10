@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API URL - will be configurable
-const BASE_URL = process.env.VITE_API_URL || 'http://localhost:3000';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -48,6 +48,8 @@ export const authApi = {
     api.post('/api/v1/auth/signup', userData),
   
   logout: () => api.post('/api/v1/auth/logout'),
+
+  getProfile: () => api.get('/api/v1/auth/profile'),
 };
 
 // Product API calls

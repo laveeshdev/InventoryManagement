@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { productApi } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,52 +21,53 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Search, Filter, Edit3, Package } from "lucide-react";
+import { Plus, Search, Filter, Edit3, Package, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
-// Mock data
-const mockProducts = [
-  {
-    id: 1,
-    name: "Premium Widget A",
-    sku: "PWA001",
-    quantity: 150,
-    price: 29.99,
-    status: "active",
-    category: "Widgets",
-  },
-  {
-    id: 2,
-    name: "Standard Component B",
-    sku: "SCB002", 
-    quantity: 5,
-    price: 15.50,
-    status: "low_stock",
-    category: "Components",
-  },
-  {
-    id: 3,
-    name: "Deluxe Assembly C",
-    sku: "DAC003",
-    quantity: 75,
-    price: 89.99,
-    status: "active",
-    category: "Assemblies",
-  },
-  {
-    id: 4,
-    name: "Basic Tool D",
-    sku: "BTD004",
-    quantity: 0,
-    price: 12.25,
-    status: "out_of_stock",
-    category: "Tools",
-  },
-];
+interface Product {
+  _id: string;
+  name: string;
+  sku: string;
+  quantity: number;
+  price: number;
+  category?: string;
+}
 
 export default function Inventory() {
-  const [products, setProducts] = useState(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await productApi.getAll();
+        console.log("API Response:", response.data); // Log the full response
+        if (response.data.success) {
+          setProducts(response.data.data);
+          console.log("Products set in state:", response.data.data); // Log the data being set
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to fetch products.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An error occurred while fetching products.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [toast]);
 
   const filteredProducts = products.filter(
     (product) =>
@@ -73,14 +75,14 @@ export default function Inventory() {
       product.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusBadge = (status: string, quantity: number) => {
-    if (status === "out_of_stock" || quantity === 0) {
+  const getStatusBadge = (quantity: number) => {
+    if (quantity === 0) {
       return <Badge variant="destructive">Out of Stock</Badge>;
     }
-    if (status === "low_stock" || quantity < 20) {
-      return <Badge className="bg-warning text-warning-foreground">Low Stock</Badge>;
+    if (quantity < 20) {
+      return <Badge className="bg-yellow-500 text-white">Low Stock</Badge>;
     }
-    return <Badge className="bg-success text-success-foreground">Active</Badge>;
+    return <Badge className="bg-green-500 text-white">In Stock</Badge>;
   };
 
   const formatCurrency = (amount: number) => {
@@ -89,6 +91,14 @@ export default function Inventory() {
       currency: 'USD'
     }).format(amount);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -228,7 +238,7 @@ export default function Inventory() {
             </TableHeader>
             <TableBody>
               {filteredProducts.map((product) => (
-                <TableRow key={product.id} className="hover:bg-muted/50">
+                <TableRow key={product._id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell className="font-mono text-sm">{product.sku}</TableCell>
                   <TableCell>
@@ -241,7 +251,7 @@ export default function Inventory() {
                   </TableCell>
                   <TableCell>{formatCurrency(product.price)}</TableCell>
                   <TableCell>
-                    {getStatusBadge(product.status, product.quantity)}
+                    {getStatusBadge(product.quantity)}
                   </TableCell>
                   <TableCell>
                     <Button variant="ghost" size="sm">
