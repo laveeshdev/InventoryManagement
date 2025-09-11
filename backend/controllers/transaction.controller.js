@@ -9,6 +9,7 @@ export const createTransaction = async (req , res) => {
 
 
         const owner = req.user._id ;
+        const partyName = 
         console.log(owner , party , items , type , invoice , date ,remarks ) ;
         
         if(!owner || !party || !items || !type || !invoice ){
@@ -22,7 +23,9 @@ export const createTransaction = async (req , res) => {
 
         const newtransaction = new Transaction({
             owner,
+            
             party,
+            partyName , 
             items,
             paymentStatus,
             totalAmount,
