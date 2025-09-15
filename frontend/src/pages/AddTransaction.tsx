@@ -87,7 +87,7 @@ export default function AddTransaction() {
         ]);
         
   // Process the data
-  const partiesData = Array.isArray(partiesRes.data) ? partiesRes.data : (Array.isArray(partiesRes.data.data) ? partiesRes.data.data : []);
+  const partiesData = Array.isArray(partiesRes.data.parties) ? partiesRes.data.parties : [];
   const productsData = Array.isArray(productsRes.data.data) ? productsRes.data.data : [];
 
   setParties(partiesData);

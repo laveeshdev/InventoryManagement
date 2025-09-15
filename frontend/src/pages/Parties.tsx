@@ -66,12 +66,12 @@ export default function Parties() {
       try {
         const response = await partyApi.getAll();
         console.log("Party API response:", response.data);
-        // The backend directly returns the array of parties, not wrapped in success/data properties
-        if (Array.isArray(response.data)) {
-          setParties(response.data);
+        // The backend returns an object with a 'parties' array
+        if (response.data && Array.isArray(response.data.parties)) {
+          setParties(response.data.parties);
           toast({
             title: "Success",
-            description: `Loaded ${response.data.length} parties from database`,
+            description: `Loaded ${response.data.parties.length} parties from database`,
           });
         } else {
           toast({

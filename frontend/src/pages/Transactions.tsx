@@ -114,8 +114,8 @@ export default function Transactions() {
         
         // Enhance transaction data with party and product names
         transactionsData = transactionsData.map(transaction => {
-          // Find party name - transaction.party is the party ID string
-          const party = partiesData.find(p => p._id === transaction.party);
+          // The 'party' field is now a populated object from the backend
+          const partyName = (transaction.party as any)?.name || 'Unknown Party';
           
           // Check if items is an array before mapping
           const items = Array.isArray(transaction.items) ? transaction.items : [];
@@ -131,7 +131,7 @@ export default function Transactions() {
           
           return {
             ...transaction,
-            partyName: party ? party.name : 'Unknown Party',
+            partyName: partyName,
             items: enhancedItems
           };
         });

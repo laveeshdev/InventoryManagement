@@ -9,7 +9,7 @@ export const createTransaction = async (req , res) => {
 
 
         const owner = req.user._id ;
-        const partyName = 
+        const ownerName = req.user.name ;
         console.log(owner , party , items , type , invoice , date ,remarks ) ;
         
         if(!owner || !party || !items || !type || !invoice ){
@@ -23,9 +23,10 @@ export const createTransaction = async (req , res) => {
 
         const newtransaction = new Transaction({
             owner,
+            ownerName, 
             
             party,
-            partyName , 
+             
             items,
             paymentStatus,
             totalAmount,
@@ -46,7 +47,11 @@ export const createTransaction = async (req , res) => {
 
 export const getAllTransactions = async (req , res) => {
     try {
-        const transactions = await Transaction.find({ owner: req.user._id });
+        console.log("hello form get all transaction of owner ");
+        
+        const transactions = await Transaction.find({ owner: req.user._id }).populate('party');
+        console.log(transactions);
+        
         res.status(200).json({ transactions });
     } catch (error) {
         res.status(500).json({ message: error.message });

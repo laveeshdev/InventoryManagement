@@ -17,6 +17,11 @@ const transactionSchema = new mongoose.Schema({
         ref: "Party",
         required: true
     },
+    // partyName : {
+    //     type : String ,
+    //     required : true 
+        
+    // } , 
     items: [
         {
             listing: { type: mongoose.Schema.Types.ObjectId, ref: "Listing", required: true },

@@ -35,8 +35,8 @@ export const getPartyById = async (req , res ) => {
 
 export const getAllParties = async (req , res ) => {
     try {
-        const parties = await Party.find() ; 
-        res.status(200).json(parties) ;
+        const parties = await Party.find({ owner: req.user._id }) ; 
+        res.status(200).json({ parties }) ;
         
     } catch (error) {
         res.status(500).json({ message : error.message }) ;
